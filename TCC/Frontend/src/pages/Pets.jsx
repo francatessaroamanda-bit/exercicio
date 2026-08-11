@@ -1,26 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Pets() {
-
-  const [pets, setPets] = useState([
-    {
-      nome: "Thor",
-      especie: "Cachorro",
-      raca: "Golden Retriever",
-      dono: "Maria"
-    },
-    {
-      nome: "Luna",
-      especie: "Gato",
-      raca: "Persa",
-      dono: "João"
-    }
-  ]);
-
+  const [pets, setPets] = useState([]);
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [editando, setEditando] = useState(null);
 
+  const [editando, setEditando] = useState(null);
 
   const [novoPet, setNovoPet] = useState({
     nome: "",
@@ -29,82 +14,227 @@ function Pets() {
     dono: ""
   });
 
+  // ============================
+  // BUSCAR PETS
+  // ============================
 
+  useEffect(() => {
+    buscarPets();
+  }, []);
 
-  function cadastrarPet(e) {
+  async function buscarPets() {
+    try {
+      const resposta = await fetch(
+        "http://localhost:5000/api/pets"
+      );
 
-    e.preventDefault();
-
-    setPets([
-      ...pets,
-      novoPet
-    ]);
-
-    limparFormulario();
-
-  }
-
-
-
-  function editarPet(index) {
-
-    setEditando(index);
-
-    setNovoPet(pets[index]);
-
-    setMostrarFormulario(true);
-
-  }
-
-
-
-  function salvarEdicao(e) {
-
-    e.preventDefault();
-
-
-    const listaAtualizada = pets.map((pet, index) => {
-
-      if (index === editando) {
-        return novoPet;
+      if (!resposta.ok) {
+        throw new Error("Erro ao buscar pets");
       }
 
-      return pet;
+      const dados = await resposta.json();
 
-    });
-
-
-    setPets(listaAtualizada);
-
-    limparFormulario();
-
+      setPets(dados);
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível carregar os pets.");
+    }
   }
 
+  // ============================
+  // CADASTRAR PET
+  // POST
+  // ============================
 
+  async function cadastrarPet(e) {
+    e.preventDefault();
 
-  function removerPet(index) {
+    if (
+      !novoPet.nome.trim() ||
+      !novoPet.especie.trim() ||
+      !novoPet.raca.trim() ||
+      !novoPet.dono.trim()
+    ) {
+      alert("Preencha todos os campos.");
+      return;
+    }
 
+    try {
+      const resposta = await fetch(
+        "http://localhost:5000/api/pets",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify(novoPet)
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        alert(
+          dados.mensagem || "Erro ao cadastrar pet."
+        );
+        return;
+      }
+
+      setPets((listaAtual) => [
+        ...listaAtual,
+        dados
+      ]);
+
+      limparFormulario();
+
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao conectar com o servidor.");
+    }
+  }
+
+  // ============================
+  // PREPARAR EDIÇÃO
+  // ============================
+
+  function editarPet(pet) {
+    setEditando(pet._id);
+
+    setNovoPet({
+      nome: pet.nome || "",
+      especie: pet.especie || "",
+      raca: pet.raca || "",
+      dono: pet.dono || ""
+    });
+
+    setMostrarFormulario(true);
+  }
+
+  // ============================
+  // SALVAR EDIÇÃO
+  // PUT
+  // ============================
+
+  async function salvarEdicao(e) {
+    e.preventDefault();
+
+    if (
+      !novoPet.nome.trim() ||
+      !novoPet.especie.trim() ||
+      !novoPet.raca.trim() ||
+      !novoPet.dono.trim()
+    ) {
+      alert("Preencha todos os campos.");
+      return;
+    }
+
+    try {
+      const resposta = await fetch(
+        `http://localhost:5000/api/pets/${editando}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify(novoPet)
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        alert(
+          dados.mensagem || "Erro ao editar pet."
+        );
+        return;
+      }
+
+      setPets((listaAtual) =>
+        listaAtual.map((pet) =>
+          pet._id === editando
+            ? dados
+            : pet
+        )
+      );
+
+      limparFormulario();
+
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao conectar com o servidor.");
+    }
+  }
+
+  // ============================
+  // REMOVER PET
+  // DELETE
+  // ============================
+
+  async function removerPet(id) {
     const confirmar = window.confirm(
       "Deseja remover este pet?"
     );
 
-
-    if (confirmar) {
-
-      const novaLista = pets.filter(
-        (_, i) => i !== index
-      );
-
-
-      setPets(novaLista);
-
+    if (!confirmar) {
+      return;
     }
 
+    try {
+      const resposta = await fetch(
+        `http://localhost:5000/api/pets/${id}`,
+        {
+          method: "DELETE"
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        alert(
+          dados.mensagem || "Erro ao remover pet."
+        );
+        return;
+      }
+
+      setPets((listaAtual) =>
+        listaAtual.filter(
+          (pet) => pet._id !== id
+        )
+      );
+
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao conectar com o servidor.");
+    }
   }
 
-
+  // ============================
+  // LIMPAR FORMULÁRIO
+  // ============================
 
   function limparFormulario() {
+    setNovoPet({
+      nome: "",
+      especie: "",
+      raca: "",
+      dono: ""
+    });
+
+    setEditando(null);
+
+    setMostrarFormulario(false);
+  }
+
+  // ============================
+  // NOVO PET
+  // ============================
+
+  function novoCadastro() {
+    setEditando(null);
 
     setNovoPet({
       nome: "",
@@ -113,30 +243,23 @@ function Pets() {
       dono: ""
     });
 
-
-    setEditando(null);
-
-    setMostrarFormulario(false);
-
+    setMostrarFormulario(true);
   }
 
-
+  // ============================
+  // TELA
+  // ============================
 
   return (
-
     <div>
 
       <h1>🐶 Pets cadastrados</h1>
 
-
-      <button onClick={() => setMostrarFormulario(true)}>
+      <button onClick={novoCadastro}>
         + Novo Pet
       </button>
 
-
-
       {mostrarFormulario && (
-
         <form
           className="formulario"
           onSubmit={
@@ -145,7 +268,6 @@ function Pets() {
               : cadastrarPet
           }
         >
-
 
           <input
             type="text"
@@ -159,7 +281,6 @@ function Pets() {
             }
           />
 
-
           <input
             type="text"
             placeholder="Espécie"
@@ -171,7 +292,6 @@ function Pets() {
               })
             }
           />
-
 
           <input
             type="text"
@@ -185,7 +305,6 @@ function Pets() {
             }
           />
 
-
           <input
             type="text"
             placeholder="Nome do dono"
@@ -198,70 +317,72 @@ function Pets() {
             }
           />
 
-
           <button type="submit">
-
             {editando !== null
               ? "Salvar Alterações"
               : "Salvar Pet"}
-
           </button>
 
+          <button
+            type="button"
+            onClick={limparFormulario}
+          >
+            Cancelar
+          </button>
 
         </form>
-
       )}
-
-
-
 
       <div className="pets-container">
 
-        {pets.map((pet, index) => (
-
-          <div className="pet-card" key={index}>
-
+        {pets.map((pet) => (
+          <div
+            className="pet-card"
+            key={pet._id}
+          >
 
             <h2>{pet.nome}</h2>
 
-
             <p>
-              <span className="info-label">Espécie:</span> {pet.especie}
+              <span className="info-label">
+                Espécie:
+              </span>{" "}
+              {pet.especie}
             </p>
 
             <p>
-              <span className="info-label">Raça:</span> {pet.raca}
+              <span className="info-label">
+                Raça:
+              </span>{" "}
+              {pet.raca}
             </p>
 
             <p>
-              <span className="info-label">Dono:</span> {pet.dono}
+              <span className="info-label">
+                Dono:
+              </span>{" "}
+              {pet.dono}
             </p>
 
-
-
-            <button onClick={() => editarPet(index)}>
+            <button
+              onClick={() => editarPet(pet)}
+            >
               Editar
             </button>
 
-
-            <button onClick={() => removerPet(index)}>
+            <button
+              onClick={() => removerPet(pet._id)}
+            >
               Remover
             </button>
 
-
           </div>
-
         ))}
-
 
       </div>
 
-
     </div>
-
   );
-
 }
-
 
 export default Pets;

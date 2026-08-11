@@ -4,32 +4,32 @@ require("dotenv").config();
 
 const conectarBanco = require("./config/database");
 
+const clienteRoutes = require("./routes/clienteRoutes");
+const petRoutes = require("./routes/petRoutes");
+const agendamentoRoutes = require("./routes/agendamentoRoutes");
 
 const app = express();
-
-
-conectarBanco();
-
 
 app.use(cors());
 
 app.use(express.json());
 
+conectarBanco();
 
-app.get("/", (req,res)=>{
+app.use("/api/clientes", clienteRoutes);
 
-    res.json({
-        mensagem:"API Mundo Pet funcionando!"
-    });
+app.use("/api/pets", petRoutes);
 
+app.use("/api/agendamentos", agendamentoRoutes);
+
+app.get("/", (req, res) => {
+  res.json({
+    mensagem: "API Mundo Pet funcionando!"
+  });
 });
-
 
 const PORT = 5000;
 
-
-app.listen(PORT,()=>{
-
-    console.log(`Servidor rodando na porta ${PORT}`);
-
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });

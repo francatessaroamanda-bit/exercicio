@@ -1,16 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Clientes() {
 
-  const [clientes, setClientes] = useState([
-    {
-      nome: "Maria Silva",
-      telefone: "(11) 99999-9999",
-      email: "maria@email.com"
-    }
-  ]);
+  const [clientes, setClientes] = useState([]);
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
   const [editando, setEditando] = useState(null);
 
   const [novoCliente, setNovoCliente] = useState({
@@ -20,69 +15,260 @@ function Clientes() {
   });
 
 
-  function cadastrarCliente(e) {
-    e.preventDefault();
+  // ============================
+  // BUSCAR CLIENTES DO MONGODB
+  // ============================
 
-    setClientes([
-      ...clientes,
-      novoCliente
-    ]);
+  useEffect(() => {
+    buscarClientes();
+  }, []);
 
-    limparFormulario();
+
+  async function buscarClientes() {
+
+    try {
+
+      const resposta = await fetch(
+        "http://localhost:5000/api/clientes"
+      );
+
+      if (!resposta.ok) {
+        throw new Error("Erro ao buscar clientes");
+      }
+
+      const dados = await resposta.json();
+
+      setClientes(dados);
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Não foi possível carregar os clientes.");
+
+    }
+
   }
 
 
-  function editarCliente(index) {
+  // ============================
+  // CADASTRAR CLIENTE
+  // POST
+  // ============================
 
-    setEditando(index);
+  async function cadastrarCliente(e) {
 
-    setNovoCliente(clientes[index]);
+    e.preventDefault();
+
+    if (
+      !novoCliente.nome ||
+      !novoCliente.telefone ||
+      !novoCliente.email
+    ) {
+
+      alert("Preencha todos os campos.");
+
+      return;
+    }
+
+
+    try {
+
+      const resposta = await fetch(
+        "http://localhost:5000/api/clientes",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify(novoCliente)
+        }
+      );
+
+
+      const dados = await resposta.json();
+
+
+      if (!resposta.ok) {
+
+        alert(dados.mensagem || "Erro ao cadastrar cliente");
+
+        return;
+      }
+
+
+      // Adiciona o cliente retornado pelo MongoDB
+      setClientes([dados, ...clientes]);
+
+
+      limparFormulario();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Erro ao conectar com o servidor.");
+
+    }
+
+  }
+
+
+  // ============================
+  // PREPARAR EDIÇÃO
+  // ============================
+
+  function editarCliente(cliente) {
+
+    setEditando(cliente._id);
+
+    setNovoCliente({
+      nome: cliente.nome,
+      telefone: cliente.telefone,
+      email: cliente.email
+    });
 
     setMostrarFormulario(true);
 
   }
 
 
-  function salvarEdicao(e) {
+  // ============================
+  // SALVAR EDIÇÃO
+  // PUT
+  // ============================
+
+  async function salvarEdicao(e) {
 
     e.preventDefault();
 
-    const listaAtualizada = clientes.map((cliente, index) => {
 
-      if (index === editando) {
-        return novoCliente;
-      }
+    if (
+      !novoCliente.nome ||
+      !novoCliente.telefone ||
+      !novoCliente.email
+    ) {
 
-      return cliente;
+      alert("Preencha todos os campos.");
 
-    });
-
-
-    setClientes(listaAtualizada);
-
-    limparFormulario();
-
-  }
+      return;
+    }
 
 
-  function removerCliente(index) {
+    try {
 
-    const confirmar = window.confirm(
-      "Deseja remover este cliente?"
-    );
+      const resposta = await fetch(
+        `http://localhost:5000/api/clientes/${editando}`,
+        {
+          method: "PUT",
 
-    if (confirmar) {
+          headers: {
+            "Content-Type": "application/json"
+          },
 
-      const novaLista = clientes.filter(
-        (_, i) => i !== index
+          body: JSON.stringify(novoCliente)
+        }
       );
 
-      setClientes(novaLista);
+
+      const dados = await resposta.json();
+
+
+      if (!resposta.ok) {
+
+        alert(dados.mensagem || "Erro ao editar cliente");
+
+        return;
+      }
+
+
+      // Atualiza o cliente na tela
+      setClientes(
+        clientes.map((cliente) =>
+          cliente._id === editando
+            ? dados
+            : cliente
+        )
+      );
+
+
+      limparFormulario();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Erro ao conectar com o servidor.");
 
     }
 
   }
 
+
+  // ============================
+  // REMOVER CLIENTE
+  // DELETE
+  // ============================
+
+  async function removerCliente(id) {
+
+    const confirmar = window.confirm(
+      "Deseja remover este cliente?"
+    );
+
+
+    if (!confirmar) {
+      return;
+    }
+
+
+    try {
+
+      const resposta = await fetch(
+        `http://localhost:5000/api/clientes/${id}`,
+        {
+          method: "DELETE"
+        }
+      );
+
+
+      const dados = await resposta.json();
+
+
+      if (!resposta.ok) {
+
+        alert(dados.mensagem || "Erro ao remover cliente");
+
+        return;
+      }
+
+
+      // Remove da tela
+      setClientes(
+        clientes.filter(
+          (cliente) => cliente._id !== id
+        )
+      );
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Erro ao conectar com o servidor.");
+
+    }
+
+  }
+
+
+  // ============================
+  // LIMPAR FORMULÁRIO
+  // ============================
 
   function limparFormulario() {
 
@@ -106,10 +292,21 @@ function Clientes() {
       <h1>👥 Clientes</h1>
 
 
-      <button onClick={() => setMostrarFormulario(true)}>
+      <button
+        onClick={() => {
+          setEditando(null);
+
+          setNovoCliente({
+            nome: "",
+            telefone: "",
+            email: ""
+          });
+
+          setMostrarFormulario(true);
+        }}
+      >
         + Novo Cliente
       </button>
-
 
 
       {mostrarFormulario && (
@@ -122,6 +319,7 @@ function Clientes() {
           }
           className="formulario"
         >
+
 
           <input
             type="text"
@@ -171,35 +369,57 @@ function Clientes() {
           </button>
 
 
+          <button
+            type="button"
+            onClick={limparFormulario}
+          >
+            Cancelar
+          </button>
+
+
         </form>
 
       )}
 
 
-
       <div className="pets-container">
 
-        {clientes.map((cliente, index) => (
+        {clientes.map((cliente) => (
 
-          <div className="pet-card" key={index}>
+          <div
+            className="pet-card"
+            key={cliente._id}
+          >
 
             <h2>{cliente.nome}</h2>
 
-            <p>
-              <span className="info-label">Telefone:</span> {cliente.telefone}
-            </p>
 
             <p>
-              <span className="info-label">Email:</span> {cliente.email}
+              <span className="info-label">
+                Telefone:
+              </span>{" "}
+              {cliente.telefone}
             </p>
 
 
-            <button onClick={() => editarCliente(index)}>
+            <p>
+              <span className="info-label">
+                Email:
+              </span>{" "}
+              {cliente.email}
+            </p>
+
+
+            <button
+              onClick={() => editarCliente(cliente)}
+            >
               Editar
             </button>
 
 
-            <button onClick={() => removerCliente(index)}>
+            <button
+              onClick={() => removerCliente(cliente._id)}
+            >
               Remover
             </button>
 
@@ -214,6 +434,7 @@ function Clientes() {
     </div>
 
   );
+
 }
 
 export default Clientes;
