@@ -1,4 +1,9 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate
+} from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 
@@ -9,30 +14,114 @@ import Agendamentos from "./pages/Agendamentos";
 import Servicos from "./pages/Servicos";
 import Login from "./pages/Login";
 
+
+// ==========================================
+// ROTA PROTEGIDA
+// ==========================================
+
+function RotaProtegida({ children }) {
+  const estaLogado =
+    sessionStorage.getItem("adminLogado") === "true";
+
+  if (!estaLogado) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+
+// ==========================================
+// LAYOUT DO SISTEMA
+// ==========================================
+
+function LayoutProtegido() {
+  return (
+    <div className="layout">
+
+      <Sidebar />
+
+      <main className="content">
+
+        <Routes>
+
+          <Route
+            path="/"
+            element={<Home />}
+          />
+
+          <Route
+            path="/clientes"
+            element={<Clientes />}
+          />
+
+          <Route
+            path="/pets"
+            element={<Pets />}
+          />
+
+          <Route
+            path="/agendamentos"
+            element={<Agendamentos />}
+          />
+
+          <Route
+            path="/servicos"
+            element={<Servicos />}
+          />
+
+        </Routes>
+
+      </main>
+
+    </div>
+  );
+}
+
+
+// ==========================================
+// APP
+// ==========================================
+
 function App() {
   return (
     <BrowserRouter>
 
-      <div className="layout">
+      <Routes>
 
-        <Sidebar />
+        {/* ================================
+            LOGIN
+        ================================= */}
 
-        <main className="content">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/pets" element={<Pets />} />
-            <Route path="/agendamentos" element={<Agendamentos />} />
-            <Route path="/servicos" element={<Servicos />} />
-            
-          </Routes>
-        </main>
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-      </div>
+
+        {/* ================================
+            ÁREA PROTEGIDA
+        ================================= */}
+
+        <Route
+          path="/*"
+          element={
+            <RotaProtegida>
+              <LayoutProtegido />
+            </RotaProtegida>
+          }
+        />
+
+      </Routes>
 
     </BrowserRouter>
   );
 }
 
 export default App;
+

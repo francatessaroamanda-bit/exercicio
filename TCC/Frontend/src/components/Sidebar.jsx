@@ -1,12 +1,29 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FaHome, FaUsers, FaDog, FaCalendarAlt, FaCut } from "react-icons/fa";
+
+import {
+  FaHome,
+  FaUsers,
+  FaDog,
+  FaCalendarAlt,
+  FaCut
+} from "react-icons/fa";
 
 function Sidebar() {
 
   const navigate = useNavigate();
 
-  return (
+  function sair() {
 
+    // Remove o acesso do administrador
+    sessionStorage.removeItem("adminLogado");
+
+    // Volta para o login
+    navigate("/login", {
+      replace: true
+    });
+  }
+
+  return (
     <aside className="sidebar">
 
       <div className="logo">
@@ -39,16 +56,14 @@ function Sidebar() {
       </Link>
 
 
-      <button 
+      <button
         className="logout"
-        onClick={() => navigate("/login")}
+        onClick={sair}
       >
         Sair
       </button>
 
-
     </aside>
-
   );
 }
 
