@@ -1,0 +1,337 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+body {
+  font-family: "Trebuchet MS", sans-serif;
+  background: #faf3e8;
+  color: #4a4036;
+  margin: 0;
+}
+
+
+/* Layout principal */
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+
+/* Menu lateral */
+
+.sidebar {
+  width: 270px;
+  background: #fffaf2;
+  padding: 30px 25px;
+  border-radius: 0 30px 30px 0;
+  box-shadow: 5px 0 20px rgba(0,0,0,0.05);
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* Logo */
+
+.logo {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.logo h2 {
+  font-family: 'Pacifico', cursive;
+  font-size: 30px;
+  color: #8b4513;
+  margin: 0;
+  text-align: center;
+}
+
+/* Links */
+
+.sidebar a {
+  color: #6b5747;
+  text-decoration: none;
+  font-size: 20px;
+  padding: 15px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+
+.sidebar a:hover {
+  background: #f3e4d1;
+}
+
+
+/* Botão sair */
+
+.logout {
+  margin-top: auto;
+  background: #b87552;
+}
+
+
+.logout:hover {
+  background: #9d6040;
+}
+
+
+
+/* Conteúdo */
+
+.content {
+  flex: 1;
+  padding: 40px;
+}
+
+
+/* Home */
+
+.welcome-card {
+  background: white;
+  padding: 50px;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+
+.welcome-card h1 {
+  font-size: 38px;
+  color: #8b5e3c;
+}
+
+
+.welcome-card p {
+  font-size: 20px;
+  color: #6b5747;
+}
+
+
+
+/* Cards */
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+  margin-top: 40px;
+}
+
+
+.card-dashboard {
+
+  background: white;
+  padding: 25px;
+  border-radius: 25px;
+
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+
+}
+
+
+.card-dashboard h3 {
+  color: #8b5e3c;
+}
+
+
+.card-dashboard p {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+
+.icone {
+  font-size: 40px;
+}
+
+
+
+/* Pets, Clientes e Serviços */
+
+.pets-container {
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+
+}
+
+
+.pet-card {
+
+  background: white;
+  padding: 25px;
+  border-radius: 25px;
+
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+
+}
+
+
+.pet-card h2 {
+
+  color: #8b5e3c;
+  margin-bottom: 15px;
+
+}
+
+
+.pet-card p {
+
+  margin: 10px 0;
+
+}
+
+
+
+/* Botões */
+
+button {
+
+  background: #c98b5b;
+  color: white;
+
+  border: none;
+
+  padding: 12px 25px;
+
+  border-radius: 20px;
+
+  font-size: 16px;
+
+  cursor: pointer;
+
+  margin-bottom: 20px;
+
+}
+
+
+button:hover {
+
+  opacity: 0.85;
+
+}
+
+
+
+/* Formulários */
+
+.formulario {
+
+  background: white;
+
+  padding: 30px;
+
+  border-radius: 25px;
+
+  margin: 20px 0;
+
+  width: 400px;
+
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+
+}
+
+
+
+.formulario input,
+.formulario select {
+
+  width: 100%;
+
+  padding: 12px;
+
+  margin-bottom: 15px;
+
+  border-radius: 15px;
+
+  border: 1px solid #ddd;
+
+  box-sizing: border-box;
+
+}
+
+
+
+/* Login */
+
+.login-container {
+
+  height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+}
+
+
+
+.login-card {
+
+  background: white;
+
+  padding: 40px;
+
+  border-radius: 30px;
+
+  width: 350px;
+
+  text-align: center;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+
+}
+
+
+
+.login-card h1 {
+
+  font-size: 35px;
+
+  color: #8b5e3c;
+
+}
+
+
+
+.login-card input {
+
+  width: 100%;
+
+  padding: 12px;
+
+  margin: 10px 0;
+
+  border-radius: 15px;
+
+  border: 1px solid #ddd;
+
+  box-sizing: border-box;
+
+}
+
+
+
+.login-card button {
+
+  width: 100%;
+
+  margin-top: 20px;
+
+}
+
+.info-label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #8b5e3c;
+}
